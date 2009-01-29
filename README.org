@@ -1,0 +1,140 @@
+* Emergenta system, VT-09
+
+
+* Laboration 2: Boids
+ 
+
+** Introduktion
+
+På slutet av 80-talet utvecklade Craig Reynolds en modell för hur
+artificiella individer, kallade boids, rör sig i flock. Varje boid
+följer några enkla regler vilket resulterar i ett
+flockbeteende. Reynolds modell bygger på följande regler:
+
+    * Collision avoidance: undvik att kollidera med dina grannar
+    * Velocity matching: försök hålla samma fart och riktning som dina
+      grannar
+    * Flock centering: försök att hålla dig i mitten av dina grannar
+
+Reynolds utökar också modellen till att inkludera mål som flocken
+strävar mot samt undvikande av hinder i omgivningen. När det gäller
+hinder presenterar Reynolds två modeller. Den första är baserad på
+kraftfält runt hinder; när en boid befinner sig nära ett hinder är
+kraftfältet starkt och benägenheten att svänga därifrån blir hög. I
+den andra, steer-to-avoid, tar en boid bara hänsyn till hinder som
+ligger rakt framåt och beräknar en ny kurs för att undvika hindret. Se
+Reynolds, 1987.
+
+Laborationen ska lösas i grupper om två personer.
+
+** Syfte
+
+Det övergripande syftet är att öka förståelsen för emergenta
+system. Laborationen har följande delsyften:
+
+    * Öka förståelsen för boids och självorganisation
+    * Stimulera till tankar kring emergenta egenskaper i system
+
+** Uppgift
+** Allmänt
+
+I NetLogos modellbibliotek finns en enkel boids-modell kallad
+Flocking. Varje agent i modellen följer följande enkla regler:
+
+    * Separate: undvik att flyga för nära andra boids
+    * Align: flyg i samma riktning som andra boids i flocken genom att
+      ta ett medelvärde av flockens riktning
+    * Cohere: försök flyga så nära flockens mitt som möjligt
+
+Dessa regler resulterar i att agenterna istället för att röra sig
+slumpmässigt i världen rör sig i en eller flera flockar.
+
+För att göra den befintliga modellen lite mer realistisk och
+intressant ska hinder som boids undviker och gemensamma mål läggas in.
+
+I laborationen är följande uppgifter obligatoriska:
+
+* Hinder
+
+Modellen ska utvidgas till att inkludera hinder som flockarna undviker
+med hjälp av någon av Reynolds metoder, era boids ska undvika hinder
+på ett sätt som ser naturligt ut. Ni behöver bara inkludera
+punktformade hinder men om ni vill får ni självklart lägga in större
+hinder eller lägga flera punktformade hinder nära varandra. I en bra
+lösning kan flocken flyga mot ett hinder, delas upp i två delflockar
+och när hindret är passerat fortsätta flyga i en flock med bibehållen
+kurs. Frågor att fundera kring är: Vad krävs för att en flock ska
+kunna splittras upp när de undviker ett hinder och gå ihop till en
+samlad flock när hindret är passerat? Vilken metod valde ni och
+varför? Hur skulle er metod fungera med andra hinder än punktformade?
+Finns det någon gräns för hur stora hindren kan vara?  Mål
+
+Modellen ska utvidgas till att inkludera ett gemensamt mål, alltså en
+punkt eller yta i världen som alla boids strävar efter att
+nå. Minimikravet är att man ska kunna ställa in målet genom att med
+muspekaren välja en punkt i världen (se NetLogos
+dokumentation). Frågor att fundera kring: Hur bibehålls flockbeteendet
+när ett mål finns? Hur stor vikt bör man lägga på mål, hinder och
+flockbeteende för att få ett beteende som ser naturligt ut? Vilken
+sorts beteende anser ni är naturligt eller önskvärt?
+
+* Följande uppgifter är frivilliga:
+
+** Sagan om ringen
+
+I ett segment av Frodo Baggins och ringens brödraskaps färd till
+landet Mordor måste de ta sig igenom ett stycke snårig terräng
+bestående av träd och berg. Använd modellen med flockar,
+hinderhantering och mål för att simulera gruppens resa från en
+startposition till ett mål. Detta är ett exempel på scripted
+flocking. Använd gärna NetLogos färdiga former för hinder och
+individer. Bland annat finns former för människor, träd och
+bergliknande terräng. Det går också att skapa egna former med NetLogos
+Shapes Editor (under Tools-menyn). Kreativitet uppmuntras!  Rörliga
+hinder
+
+Hinder som rör på sig blir svårare att undvika då boids måste ta
+hänsyn inte bara till position utan också till hindrens rörelse. En
+utökning med rörliga hinder kan kombineras med Sagan om
+ringen-scenariot för att introducera nya element som måste
+undvikas. Kanske en grupp orcher som jagar brödraskapet?  Viktning
+
+På sidorna 272-275 i Flake beskrivs hur boids olika mål (separation,
+centering osv.) kan viktas. I NetLogos Flockingmodell kan visserligen
+parametrar regleras för att uppnå olika beteenden men en mer generell
+viktning liknande den som beskrivs av Flake skulle vara mer
+intressant. Implementera viktning av boids olika beteenden där er
+hinderhantering och gemensamma mål ingår.  Redovisning
+
+Laborationen ska dels redovisas med en rapport och dels genom
+deltagande i redovisningen av laborationen (se schemat för
+tidpunkt). Rapportens huvudsyfte är att redovisa era reflektioner
+kring det som laborationen behandlar, dvs reflektionsdelen är
+viktig. Diskutera de frågor som nämns ovan och försöka att sätta in
+laborationen i ett större sammanhang. Vilka applikationsområden kan du
+se för den här typen av algoritmer? Kan modellen utöka för att göras
+mer intressant?
+
+Under redovisningen av laborationen kommer vi att eventuellt titta på
+någon lösning och därefter diskutera kring olika frågeställningar.
+Innehåll i rapport
+
+*** I er rapport ska följande punkter tas med:
+
+    * Ett fullständigt försättsblad
+    * Sökvägen till er NetLogo-kod (kan skrivas på försättsbladet)
+    * Reflektion kring er lösning och eventuella begränsningar
+    * Reflektion kring de frågor som ställs ovan samt saker som du
+      själv finner relevant. Ta gärna hjälp av skärmdumpar.
+    * Utskriven dokumenterad källkod
+
+** Datum
+
+Rapporten ska vara inlämnad senast tisdag 3 februari 16.00.
+
+Lycka till!
+
+
+[Hem][Tillbaka] http://www.cs.umu.se/kurser/5DV017/VT09/lab/lab2.html
+Ansvarig för sidan: Jonny Pettersson Senast ändrad Friday, 23-Jan-2009
+11:14:57 MET Copyright © 2009. All rights reserved.

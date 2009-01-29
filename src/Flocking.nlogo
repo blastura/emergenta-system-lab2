@@ -1,26 +1,78 @@
-turtles-own [
-  flockmates         ;; agentset of nearby turtles
-  nearest-neighbor   ;; closest one of our flockmates
+breed [ obstacles obstacle ] ;; Breed to avoid
+breed [ boids boid ] ;; Boids
+
+boids-own [
+  flockmates          ;; agentset of nearby turtles
+  nearest-neighbor    ;; closest one of our flockmates
+  
+  obstacles-in-vision ;; obstacles in field of vision
+  nearest-obstacle    ;; the nearest obstacle
 ]
 
 to setup
   clear-all
-  crt population
+  set-default-shape boids "default"
+  set-default-shape obstacles "shark"
+  
+  create-boids population
     [ set color yellow - 2 + random 7  ;; random shades look nice
       set size 1.5  ;; easier to see
       setxy random-xcor random-ycor ]
+      
+   create-obstacles nr-of-obstacles
+   [ set color red
+     set size 2 + random 8
+     setxy random-xcor random-ycor
+   ]
 end
 
 to go
-  ask turtles [ flock ]
+  ask boids [ flock ]
+  ask boids [ obstacle-avoidance ]
+
   ;; the following line is used to make the turtles
   ;; animate more smoothly.
-  repeat 5 [ ask turtles [ fd 0.2 ] display ]
+  repeat 5 [ ask boids [ fd 0.2 ] display ]
   ;; for greater efficiency, at the expense of smooth
   ;; animation, substitute the following line instead:
   ;;   ask turtles [ fd 1 ]
+
+ ask obstacles [
+   fd 1
+   rt random 50
+   lt random 50
+ ]
+
   tick
 end
+
+;;; OBSTACLE AVOIDANCE
+
+to obstacle-avoidance
+  find-obstacles
+  if any? obstacles-in-vision
+    [ find-nearest-obstacle
+      if distance nearest-obstacle < (minimum-range-to-obstacle + [size] of nearest-obstacle)
+        [ avoid-obstacle ]
+    ]
+end
+
+to find-obstacles
+  set obstacles-in-vision obstacles in-cone vision-radius vision-angle  
+end
+
+to find-nearest-obstacle
+  set nearest-obstacle min-one-of obstacles-in-vision [distance myself]
+end
+
+to avoid-obstacle
+  let angle towards nearest-obstacle
+  show word "avoid-obstacle: vinkeln var " angle
+  turn-away angle max-avoidance-turn
+end
+
+
+;;; FLOCKING
 
 to flock  ;; turtle procedure
   find-flockmates
@@ -28,12 +80,13 @@ to flock  ;; turtle procedure
     [ find-nearest-neighbor
       ifelse distance nearest-neighbor < minimum-separation
         [ separate ]
-        [ align
+        [ find-goal
+          align
           cohere ] ]
 end
 
 to find-flockmates  ;; turtle procedure
-  set flockmates other turtles in-radius vision
+  set flockmates other boids in-radius vision-radius
 end
 
 to find-nearest-neighbor ;; turtle procedure
@@ -44,6 +97,13 @@ end
 
 to separate  ;; turtle procedure
   turn-away ([heading] of nearest-neighbor) max-separate-turn
+end
+
+;;; FIND GOAL
+
+to find-goal
+  let angle towardsxy mouse-xcor mouse-ycor
+  turn-towards angle max-cohere-turn
 end
 
 ;;; ALIGN
@@ -204,25 +264,25 @@ NIL
 NIL
 
 SLIDER
-9
-51
-232
-84
+8
+10
+231
+43
 population
 population
 1.0
 1000.0
-300
+73
 1.0
 1
 NIL
 HORIZONTAL
 
 SLIDER
-4
-217
-237
-250
+9
+277
+242
+310
 max-align-turn
 max-align-turn
 0.0
@@ -234,30 +294,30 @@ degrees
 HORIZONTAL
 
 SLIDER
-4
-251
-237
-284
+9
+311
+242
+344
 max-cohere-turn
 max-cohere-turn
 0.0
 20.0
-3
+12.75
 0.25
 1
 degrees
 HORIZONTAL
 
 SLIDER
-4
-285
-237
-318
+10
+346
+243
+379
 max-separate-turn
 max-separate-turn
 0.0
 20.0
-1.5
+8
 0.25
 1
 degrees
@@ -268,21 +328,21 @@ SLIDER
 135
 232
 168
-vision
-vision
+vision-radius
+vision-radius
 0.0
 10.0
-3
+9
 0.5
 1
 patches
 HORIZONTAL
 
 SLIDER
-9
-169
-232
-202
+14
+229
+237
+262
 minimum-separation
 minimum-separation
 0.0
@@ -291,6 +351,66 @@ minimum-separation
 0.25
 1
 patches
+HORIZONTAL
+
+SLIDER
+8
+46
+180
+79
+nr-of-obstacles
+nr-of-obstacles
+0
+100
+4
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+5
+407
+238
+440
+max-avoidance-turn
+max-avoidance-turn
+0
+180
+180
+0.5
+1
+degrees
+HORIZONTAL
+
+SLIDER
+5
+443
+237
+476
+minimum-range-to-obstacle
+minimum-range-to-obstacle
+1
+20
+4
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+22
+173
+194
+206
+vision-angle
+vision-angle
+2
+360
+130
+1
+1
+NIL
 HORIZONTAL
 
 @#$#@#$#@
@@ -555,6 +675,12 @@ Polygon -7500403 true true 165 180 165 210 225 180 255 120 210 135
 Polygon -7500403 true true 135 105 90 60 45 45 75 105 135 135
 Polygon -7500403 true true 165 105 165 135 225 105 255 45 210 60
 Polygon -7500403 true true 135 90 120 45 150 15 180 45 165 90
+
+shark
+true
+0
+Circle -13345367 true false 120 15 60
+Polygon -13345367 true false 120 45 135 180 135 240 90 270 195 270 165 240 165 180 165 120 180 45
 
 square
 false

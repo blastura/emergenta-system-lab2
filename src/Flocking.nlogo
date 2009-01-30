@@ -21,7 +21,7 @@ to setup
       
    create-obstacles nr-of-obstacles
    [ set color red
-     set size 2 + random 8
+     set size 2 + random 5
      setxy random-xcor random-ycor
    ]
 end
@@ -76,8 +76,13 @@ end
 
 to avoid-obstacle
   let angle towards nearest-obstacle
+  let dangle subtract-headings angle heading
   ;;show word "avoid-obstacle: vinkeln var " angle
-  turn-away angle max-avoidance-turn
+  show word "heading: " heading
+  show word "towards nearest-obstacle: " angle
+  show word "dangle: " dangle
+  show "  "
+  turn-away-from-obstacle angle max-avoidance-turn
 end
 
 
@@ -111,7 +116,7 @@ end
 
 to find-goal
   let angle towardsxy mouse-xcor mouse-ycor
-  turn-towards angle max-cohere-turn
+  turn-towards angle max-goal-turn
 end
 
 ;;; ALIGN
@@ -153,6 +158,19 @@ end
 
 to turn-away [new-heading max-turn]  ;; turtle procedure
   turn-at-most (subtract-headings heading new-heading) max-turn
+end
+
+to turn-away-from-obstacle [heading-to-obstacle max-turn]
+  let angle (subtract-headings heading heading-to-obstacle)
+  ifelse angle > 0 [
+    set angle max-turn - angle
+    if angle < 0 [ set angle 0 ] 
+  ][
+    set angle max-turn + angle
+    if angle > 0 [ set angle 0 ] 
+  ]
+  show word "avoiding with angle: " angle
+  turn-at-most angle max-turn
 end
 
 ;; turn right by "turn" degrees (or left if "turn" is negative),
@@ -208,10 +226,10 @@ end
 GRAPHICS-WINDOW
 250
 10
-757
-538
-35
-35
+967
+748
+50
+50
 7.0
 1
 10
@@ -222,10 +240,10 @@ GRAPHICS-WINDOW
 1
 1
 1
--35
-35
--35
-35
+-50
+50
+-50
+50
 1
 1
 1
@@ -233,9 +251,9 @@ ticks
 
 CC-WINDOW
 5
-559
-766
-654
+762
+976
+857
 Command Center
 0
 
@@ -280,7 +298,7 @@ population
 population
 1.0
 1000.0
-92
+1
 1.0
 1
 NIL
@@ -295,7 +313,7 @@ max-align-turn
 max-align-turn
 0.0
 20.0
-7.75
+20
 0.25
 1
 degrees
@@ -310,7 +328,7 @@ max-cohere-turn
 max-cohere-turn
 0.0
 20.0
-7.25
+3.5
 0.25
 1
 degrees
@@ -325,7 +343,7 @@ max-separate-turn
 max-separate-turn
 0.0
 20.0
-15.75
+4.25
 0.25
 1
 degrees
@@ -347,15 +365,15 @@ patches
 HORIZONTAL
 
 SLIDER
-14
-229
-237
-262
+12
+242
+235
+275
 minimum-separation
 minimum-separation
 0.0
 5.0
-1
+0.75
 0.25
 1
 patches
@@ -377,25 +395,25 @@ NIL
 HORIZONTAL
 
 SLIDER
-5
-407
-238
-440
+7
+468
+240
+501
 max-avoidance-turn
 max-avoidance-turn
 0
 180
-58
+44.5
 0.5
 1
 degrees
 HORIZONTAL
 
 SLIDER
-5
-443
-237
-476
+7
+504
+239
+537
 minimum-range-to-obstacle
 minimum-range-to-obstacle
 1
@@ -415,33 +433,48 @@ vision-angle
 vision-angle
 2
 360
-175
+298
 1
 1
 NIL
 HORIZONTAL
 
 SWITCH
-36
-512
-184
-545
+14
+579
+162
+612
 follow-mouse?
 follow-mouse?
-1
+0
 1
 -1000
 
 SWITCH
-40
-481
-214
-514
+11
+543
+185
+576
 moving-obstacles?
 moving-obstacles?
 1
 1
 -1000
+
+SLIDER
+24
+636
+224
+669
+max-goal-turn
+max-goal-turn
+0
+20
+4
+0.5
+1
+degrees
+HORIZONTAL
 
 @#$#@#$#@
 WHAT IS IT?

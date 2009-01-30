@@ -169,19 +169,23 @@ härefter refererade som \textit{hinder}. Varje individ fått en ny
 procedur \textit{obstacle-avoidance} som utförs efter att de har
 utfört sitt flock-beteende.
 
-Hinderundvikande görs genom att varje individ letar efter det närmaste
-hinder som befinner sig i en kon framför deras färdriktning. Denna
-kons storlek bestäms av variablerna \textit{vision-radius} och
+Metoden \textit{steer-to-avoid} implementerades där hinderundvikande
+löses genom att varje individ letar efter det närmaste hinder som
+befinner sig i en kon framför deras färdriktning. Konens storlek
+bestäms av variablerna \textit{vision-radius} och
 \textit{vision-angle}. Om ett hinder upptäckts som är närmare
 individen än vad variabeln \textit{minimum-range-to-obstacle} anger så
-svänger individen bort från detta hinder %TODO.
+svänger individen bort från detta hinder. Maximalt tillåten vinkel
+denna sväng får anta i varje tidssteg är begränsad av variabeln
+\textit{max-avoidance-turn}. %TODO
 
 \subsection{Mål}
 För att få flockarna att söka sig mot ett gemensamt mål
 implementerades proceduren \textit{find-goal} som räknar ut vinkeln
-mot målet, som representeras av muspekaren. Individerna svänger mot
-målet med maximal vinkel som är samma som individerna får använda sig
-av för att röra sig mot mitten av flocken, \textit{max-cohere-turn}.
+mot målet, representerat av muspekarens position. Individerna svänger
+mot målet i varje tidssteg med maximalt tillåten vinkel som är samma
+som individerna får använda sig av för att röra sig mot mitten av
+flocken, \textit{max-cohere-turn}.
 
 \section{Strategi för testning}
 
@@ -201,23 +205,36 @@ av för att röra sig mot mitten av flocken, \textit{max-cohere-turn}.
 %     * Reflektion kring de frågor som ställs ovan samt saker som
 %       du själv finner relevant. Ta gärna hjälp av skärmdumpar.
 %     * Utskriven dokumenterad källkod
-Nedan avsnitt beskriver analysen som gjorts med avseende på frågorna
-från problemspecifikationen.
+Nedan avsnitt beskriver reflektioner som gjorts med avseende på
+frågorna från problemspecifikationen.
 
 \subsection{Hinder}
 % Vad krävs för att en flock ska kunna splittras 
 %     upp när de undviker ett hinder och gå ihop
 %     till en samlad flock när hindret är passerat?
+För att en flock ska splittras vid ett hinder och sedan samlas ihop
+igen på andra sidan hindret krävs att individerna har tillräckligt
+stor sikt för att kunna upptäcka individer som tvingades välja en
+annan väg runt hindret. Det kan hända att detta fall inte inträffar om
+splittringen av flocken blir för stor.
 % Vilken metod valde ni och varför?
+
 % Hur skulle er metod fungera med andra hinder än punktformade?
 % Finns det någon gräns för hur stora hindren kan vara?
 \subsection{Mål}
 % Modellen ska utvidgas till att inkludera ett gemensamt mål,
 %           alltså en punkt eller yta i världen som alla boids
 %           strävar efter att nå.
-% Minimikravet är att man ska kunna ställa in målet genom att
+%           Minimikravet är att man ska kunna ställa in målet genom att
 %             med muspekaren välja en punkt i världen
 % Hur bibehålls flockbeteendet när ett mål finns?
+När modellen utökades för att få individerna att söka sig mot ett
+gemensamt mål blir det svårare att avskilja vad som är flockbeteende
+och vad som är målsökarbeteende. Eftersom alla strävar mot samma mål
+får närliggande individer samma riktning. Om man ändrar på parametern
+för en individs maxsväng \textit{max-goal-turn} ser man att
+flockbeteendet finns kvar även när alla individer smått justerar sin
+riktning mot målet. 
 % Hur stor vikt bör man lägga på mål, hinder och flockbeteende
 %             för att få ett beteende som ser naturligt ut?
 % Vilken sorts beteende anser ni är naturligt eller önskvärt? 
@@ -231,7 +248,7 @@ från problemspecifikationen.
 Härefter följer utskrifter från källkoden och andra filer som hör till
 denna laboration
 
-\subsection{Termites.nlogo}\label{Termites.nlogo}
+\subsection{Flocking.nlogo}\label{app:Flocking.nlogo}
 \begin{footnotesize}
   \verbatiminput{../src/Flocking.nlogo}
 \end{footnotesize}

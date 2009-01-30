@@ -12,7 +12,7 @@ boids-own [
 to setup
   clear-all
   set-default-shape boids "default"
-  set-default-shape obstacles "shark"
+  set-default-shape obstacles "circle"
   
   create-boids population
     [ set color yellow - 2 + random 7  ;; random shades look nice
@@ -27,6 +27,19 @@ to setup
 end
 
 to go
+if moving-obstacles? [
+ ask obstacles [
+    fd 1
+    rt random 10
+    lt random 10
+  ]
+ ]
+;  ask patches [
+;    set pcolor black
+;  ]
+  if follow-mouse? and mouse-inside? [
+    ask boids [ find-goal ]  
+  ]
   ask boids [ flock ]
   ask boids [ obstacle-avoidance ]
 
@@ -36,13 +49,6 @@ to go
   ;; for greater efficiency, at the expense of smooth
   ;; animation, substitute the following line instead:
   ;;   ask turtles [ fd 1 ]
-
- ask obstacles [
-   fd 1
-   rt random 50
-   lt random 50
- ]
-
   tick
 end
 
@@ -58,7 +64,10 @@ to obstacle-avoidance
 end
 
 to find-obstacles
-  set obstacles-in-vision obstacles in-cone vision-radius vision-angle  
+  set obstacles-in-vision obstacles in-cone vision-radius vision-angle
+;  ask patches in-cone vision-radius vision-angle [
+;    set pcolor white
+;  ]
 end
 
 to find-nearest-obstacle
@@ -67,7 +76,7 @@ end
 
 to avoid-obstacle
   let angle towards nearest-obstacle
-  show word "avoid-obstacle: vinkeln var " angle
+  ;;show word "avoid-obstacle: vinkeln var " angle
   turn-away angle max-avoidance-turn
 end
 
@@ -80,8 +89,7 @@ to flock  ;; turtle procedure
     [ find-nearest-neighbor
       ifelse distance nearest-neighbor < minimum-separation
         [ separate ]
-        [ find-goal
-          align
+        [ align
           cohere ] ]
 end
 
@@ -225,9 +233,9 @@ ticks
 
 CC-WINDOW
 5
-552
+559
 766
-647
+654
 Command Center
 0
 
@@ -272,7 +280,7 @@ population
 population
 1.0
 1000.0
-73
+92
 1.0
 1
 NIL
@@ -287,7 +295,7 @@ max-align-turn
 max-align-turn
 0.0
 20.0
-5
+7.75
 0.25
 1
 degrees
@@ -302,7 +310,7 @@ max-cohere-turn
 max-cohere-turn
 0.0
 20.0
-12.75
+7.25
 0.25
 1
 degrees
@@ -317,7 +325,7 @@ max-separate-turn
 max-separate-turn
 0.0
 20.0
-8
+15.75
 0.25
 1
 degrees
@@ -332,7 +340,7 @@ vision-radius
 vision-radius
 0.0
 10.0
-9
+6.5
 0.5
 1
 patches
@@ -362,7 +370,7 @@ nr-of-obstacles
 nr-of-obstacles
 0
 100
-4
+1
 1
 1
 NIL
@@ -377,7 +385,7 @@ max-avoidance-turn
 max-avoidance-turn
 0
 180
-180
+58
 0.5
 1
 degrees
@@ -407,11 +415,33 @@ vision-angle
 vision-angle
 2
 360
-130
+175
 1
 1
 NIL
 HORIZONTAL
+
+SWITCH
+36
+512
+184
+545
+follow-mouse?
+follow-mouse?
+1
+1
+-1000
+
+SWITCH
+40
+481
+214
+514
+moving-obstacles?
+moving-obstacles?
+1
+1
+-1000
 
 @#$#@#$#@
 WHAT IS IT?

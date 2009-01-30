@@ -39,8 +39,8 @@
 \floatname{kod}{Kodsnutt}
 
 % vars
-\def\title{Termiter i NetLogo}
-\def\preTitle{Laboration 1}
+\def\title{Boids}
+\def\preTitle{Laboration 2}
 \def\kurs{Emergenta system, VT-09}
 
 \def\namn{Andreas Jakobsson}
@@ -48,7 +48,7 @@
 \def\namnTva{Anton Johansson}
 \def\mailTva{dit06ajn@cs.umu.se}
 
-\def\pathtocode{$\sim$dit06ajn/edu/emergenta-system/lab1/src}
+\def\pathtocode{$\sim$dit06ajn/edu/emergenta-system/lab2/src}
 
 \def\handledareEtt{Jonny Pettersson, jonny@cs.umu.se}
 \def\handledareTva{Anders Broberg, bopspe@cs.umu.se}
@@ -114,292 +114,113 @@
 \section{Problemspecifikation}\label{sec:problemspecifikation}
 Laborationen gick ut på att göra ändringar i en befintlig
 NetLogo\footnote{http://ccl.northwestern.edu/netlogo/} modell som
-imiterar myrors beteende att bygga myrstackar. Ändringarna som skulle
-göras och studeras var:
+imiterar flockbete. Modellen utvecklades av Craig Reynolds på 80-talet
+och varje individ, så kallad \textit{boid}, följer tre enkla regler:
 
 \begin{itemize}
-\item Sortering av flera sorters träbitar för att bygga olika
-  myrstackar.
-\item Laborera med feltolerans, vad händer med modellen om det införs
-  myror som på något sätt stör de andra myrornas beteende?
+\item Undvik kollision med grannar.
+\item Håll samma hastighet och riktning som dina grannar.
+\item Försök ha en  position så nära centrum av flocken som möjligt.
 \end{itemize}
-% Behövs det ytterligare regler i termiterna för att systemet ska
-% konvergera till en separat hög för varje sorts träbitar?
+
+Denna modell ska utökas så att flockarna ska kunna undvika hinder i
+dess väg, och att de istället för att röra sig slumpvis omkring i
+miljön ska kunna röra sig mot ett gemensamt mål som bestäms av
+muspekarens position.
+
+\subsection{Frågor som ska behandlas}
+I problemspecifikationen finns följande frågor som denna rapport ska
+behandla.
+
+\textbf{Hinder:}
+\begin{itemize}
+\item Vad krävs för att en flock ska kunna splittras upp när de
+  undviker ett hinder och gå ihop till en samlad flock när hindret är
+  passerat?
+\item Vilken metod valde ni och varför?
+\item Hur skulle er metod fungera med andra hinder än punktformade?
+\item Finns det någon gräns för hur stora hindren kan vara?
+\end{itemize}
+
+\textbf{Mål:}
+\begin{itemize}
+\item Modellen ska utvidgas till att inkludera ett gemensamt mål,
+  alltså en punkt eller yta i världen som alla boids strävar efter att
+  nå.
+\item Minimikravet är att man ska kunna ställa in målet genom att med
+  muspekaren välja en punkt i världen
+\item Frågor att fundera kring:
+\item Hur bibehålls flockbeteendet när ett mål finns?
+\item Hur stor vikt bör man lägga på mål, hinder och flockbeteende för
+  att få ett beteende som ser naturligt ut?
+\item Vilken sorts beteende anser ni är naturligt eller önskvärt? 
+\end{itemize}
 
 Laborationsspecifikation finns i original på sidan:\\
-\verb!http://www.cs.umu.se/kurser/5DV017/VT09/lab/lab1.html!
+\verb!http://www.cs.umu.se/kurser/5DV017/VT09/lab/lab2.html!
+
+\section{Algoritmbeskrivning}
+Nedan avsnitt beskriver de algoritmer som implementerats för att
+införa hinderavvikelse och målsökande i modellen.
+
+\subsection{Hinder}
+För att flockarna ska kunna undvika hinder har det införts nya agenter
+härefter refererade som \textit{hinder}. Varje individ fått en ny
+procedur \textit{obstacle-avoidance} som utförs efter att de har
+utfört sitt flock-beteende.
+
+Hinderundvikande görs genom att varje individ letar efter det närmaste
+hinder som befinner sig i en kon framför deras färdriktning. Denna
+kons storlek bestäms av variablerna \textit{vision-radius} och
+\textit{vision-angle}. Om ett hinder upptäckts som är närmare
+individen än vad variabeln \textit{minimum-range-to-obstacle} anger så
+svänger individen bort från detta hinder %TODO.
+
+\subsection{Mål}
+För att få flockarna att söka sig mot ett gemensamt mål
+implementerades proceduren \textit{find-goal} som räknar ut vinkeln
+mot målet, som representeras av muspekaren. Individerna svänger mot
+målet med maximal vinkel som är samma som individerna får använda sig
+av för att röra sig mot mitten av flocken, \textit{max-cohere-turn}.
+
+\section{Strategi för testning}
 
 \section{Reflektioner}
+% Rapportens huvudsyfte är att redovisa era reflektioner kring det som
+% laborationen behandlar, dvs reflektionsdelen är viktig.  Diskutera
+% de frågor som nämns ovan och försöka att sätta in laborationen i ett
+% större sammanhang. Vilka applikationsområden kan du se för den här
+% typen av algoritmer?  Kan modellen utöka för att göras mer
+% intressant?
+
+% I er rapport ska följande punkter tas med:
+
+%     * Ett fullständigt försättsblad
+%     * Sökvägen till er NetLogo-kod (kan skrivas på försättsbladet)
+%     * Reflektion kring er lösning och eventuella begränsningar
+%     * Reflektion kring de frågor som ställs ovan samt saker som
+%       du själv finner relevant. Ta gärna hjälp av skärmdumpar.
+%     * Utskriven dokumenterad källkod
 Nedan avsnitt beskriver analysen som gjorts med avseende på frågorna
 från problemspecifikationen.
 
-\subsection{Sortering av olika träbitar}
-% Reflektion kring er lösning och eventuella begränsningar
-
-% Den ursprungliga termitmodellen innehåller endast en sorts termiter
-% och en sorts träbitar. Utöka modellen till minst två sorters termiter
-% och två sorters träbitar. Behövs det ytterligare regler i termiterna
-% för att systemet ska konvergera till en separat hög för varje sorts
-% träbitar? Behövs det ytterligare regler för att minska
-% konvergeringstiden? Med konvergering menas här att det endast finns en
-% hög av varje sorts träbitar när systemet konvergerat.
-
-För att sortera olika sorters träbitar görs skapas olika myrsorter som
-var för sig enbart är intresserade av att plocka upp och lägga ner
-träbitar av en specifik sort. För att en myrsort ska lägga ner sin
-träbit krävs att den först hittat en träbit av samma sort. Det är
-alltså inga ny regler som införts bara nya myrsorter och
-träbitar. Myrsorterna är helt oberoende av varandra.
-
-Vid försök med en myrsort som plockar upp alla möjliga träsorter men
-enbart lägger ner dem när de hittat en träsort av samma typ som myran
-själv bär på blev det problem med att högar bildades av blandade
-träsorter. Detta eftersom myrorna inte var benägna att gå in mot
-mitten av en hög för att plocka träbitar, så fort en träbit hittades
-plockade den och lades så fort en liknande träbit hittades, vilket
-alltså gjorde att myrorna alltid höll sig i utkanten av högarna. Ingen
-filtrering av redan skapade högar utfördes.
-
-För att minska tiden det tog för myrorna att av varje träsort enbart
-bilda en samlad hög ökades stegen som myrorna tog mellan varje
-procedur.
-
-\subsection{Feltolerans}
-% I ett system är feltolerans en viktig egenskap, ett naturligt eller
-% artificiellt system måste tåla i en viss utsträckning att saker går
-% fel och att andra agenter i dess omgivning vill förstöra. Studera hur
-% termitmodellen reagerar om det införs termiter som på något sätt
-% förstör (exempelvis genom att plocka upp träbitar och lägga ned dem
-% där inga andra träbitar finns). Frågor att fundera kring är: Hur stor
-% andel förstörande termiter behövs det minst för att förstöra
-% uppbyggnaden av en hög? Hur påverkas konvergeringshastigheten? Studera
-% detta med endast en sorts termiter/träbitar och med flera sorters
-% termiter/träbitar.
-
-%  I er inlämnade lösning ska det enkelt gå att ändra antalet av
-%  respektive sort termiter och andelen av respektive sort träbitar.
-
-För att testa feltoleransen i systemet lades myror in som plockar upp
-alla träsorter de stöter på och efter ett bestämt antal steg försöker
-lägga ner denna träbit på en ledig plats.
-
-Test gjordes där kvoten mellan jobbande myror och förstörande myror
-varierades.  I figur \ref{fig:first-conv-pic} –
-\ref{fig:last-conv-pic} har kvoten förstörande myror varierats mellan
-0 till 10 \%, konvergering av högarna påbörjas inom 90 sekunder. Ökas
-kvoten till 12 \% syns inga tecken på konvergering av högarna inom 180
-sekunder, se figur \ref{fig:12proc}. Detta kan tänkas beror på att
-antalet myror av båda sorter i förhållande till storleken på miljön de
-befinner sig i har blivit för fylld. Troligtvis kommer även denna
-modell att konvergera om den låtes köra vidare.
-
-Vidare tester gjordes med ett mindre antal myror fast med samma
-densitet av träbitar (totalt 400 arbetande myror + varierat antal
-förstörande myror). Figur \ref{fig:first-new} - \ref{fig:last-new}
-visar att modellerna med högre kvot förstörande myror även de
-konvergerar vid längre körningar. En krans av spridda träbitar runt
-högarna tyder på den kontinuerliga förstörelsen.
-
-Vi antar att det kommer att krävas fler antal förstörande myror än
-antalet uppbyggande myror för att hindra konvergering av högarna. Ett
-test av detta skulle ta allt för lång tid att genomföra.
-
-I de gjorda testen konvergerar högarna alltid men konvergeringstiden
-ökar markant.
-
-\begin{figure}
-  \begin{minipage}[b]{0.5\linewidth} % A minipage that covers half the page
-    \centering
-    \caption{30 sekunder, inga badAnts}\label{fig:first-conv-pic}
-    \includegraphics[width=6cm]{images/no-bad-30.png}
-  \end{minipage}
-  \hspace{0.5cm} % To get a little bit of space between the figures
-  \begin{minipage}[b]{0.5\linewidth}
-    \centering
-    \caption{30 sekunder, 0,02 \% badAnts}
-    \includegraphics[width=6cm]{images/10-bad-30.png}
-  \end{minipage}
-
-  \begin{minipage}[b]{0.5\linewidth} % A minipage that covers half the page
-    \centering
-    \caption{60 sekunder, inga badAnts}
-    \includegraphics[width=6cm]{images/no-bad-60.png}
-  \end{minipage}
-  \hspace{0.5cm} % To get a little bit of space between the figures
-  \begin{minipage}[b]{0.5\linewidth}
-    \centering
-    \caption{60 sekunder, 0,02 \% badAnts}
-    \includegraphics[width=6cm]{images/10-bad-60.png}
-  \end{minipage}
-  
-  \begin{minipage}[b]{0.5\linewidth} % A minipage that covers half the page
-    \centering
-    \caption{90 sekunder, inga badAnts}
-    \includegraphics[width=6cm]{images/no-bad-90.png}
-  \end{minipage}
-  \hspace{0.5cm} % To get a little bit of space between the figures
-  \begin{minipage}[b]{0.5\linewidth}
-    \centering
-    \caption{90 sekunder, 0,02 \% badAnts}
-    \includegraphics[width=6cm]{images/10-bad-90.png}
-  \end{minipage}
-\end{figure}
-
-\begin{figure}
-  \begin{minipage}[b]{0.5\linewidth} % A minipage that covers half the page
-    \centering
-    \caption{30 sekunder, 4 \% badAnts}
-    \includegraphics[width=6cm]{images/20-bad-30.png}
-  \end{minipage}
-  \hspace{0.5cm} % To get a little bit of space between the figures
-  \begin{minipage}[b]{0.5\linewidth}
-    \centering
-    \caption{30 sekunder, 6 \% badAnts}
-    \includegraphics[width=6cm]{images/30-bad-30.png}
-  \end{minipage}
-
-  \begin{minipage}[b]{0.5\linewidth} % A minipage that covers half the page
-    \centering
-    \caption{60 sekunder, 4 \% badAnts}
-    \includegraphics[width=6cm]{images/20-bad-60.png}
-  \end{minipage}
-  \hspace{0.5cm} % To get a little bit of space between the figures
-  \begin{minipage}[b]{0.5\linewidth}
-    \centering
-    \caption{60 sekunder, 6 \% badAnts}
-    \includegraphics[width=6cm]{images/30-bad-60.png}
-  \end{minipage}
-  
-  \begin{minipage}[b]{0.5\linewidth} % A minipage that covers half the page
-    \centering
-    \caption{90 sekunder, 4 \% badAnts}
-    \includegraphics[width=6cm]{images/20-bad-90.png}
-  \end{minipage}
-  \hspace{0.5cm} % To get a little bit of space between the figures
-  \begin{minipage}[b]{0.5\linewidth}
-    \centering
-    \caption{90 sekunder, 6 \% badAnts}
-    \includegraphics[width=6cm]{images/30-bad-90.png}
-  \end{minipage}
-\end{figure}
-
-\begin{figure}
-  \begin{minipage}[b]{0.5\linewidth} % A minipage that covers half the page
-    \centering
-    \caption{30 sekunder, 8 \% badAnts}
-    \includegraphics[width=6cm]{images/40-bad-30.png}
-  \end{minipage}
-  \hspace{0.5cm} % To get a little bit of space between the figures
-  \begin{minipage}[b]{0.5\linewidth}
-    \centering
-    \caption{30 sekunder, 10 \% badAnts}
-    \includegraphics[width=6cm]{images/50-bad-30.png}
-  \end{minipage}
-
-  \begin{minipage}[b]{0.5\linewidth} % A minipage that covers half the page
-    \centering
-    \caption{60 sekunder, 8 \% badAnts}
-    \includegraphics[width=6cm]{images/40-bad-60.png}
-  \end{minipage}
-  \hspace{0.5cm} % To get a little bit of space between the figures
-  \begin{minipage}[b]{0.5\linewidth}
-    \centering
-    \caption{60 sekunder, 10 \% badAnts}
-    \includegraphics[width=6cm]{images/50-bad-60.png}
-  \end{minipage}
-  
-  \begin{minipage}[b]{0.5\linewidth} % A minipage that covers half the page
-    \centering
-    \caption{90 sekunder, 8 \% badAnts}
-    \includegraphics[width=6cm]{images/40-bad-90.png}
-  \end{minipage}
-  \hspace{0.5cm} % To get a little bit of space between the figures
-  \begin{minipage}[b]{0.5\linewidth}
-    \centering
-    \caption{90 sekunder, 10 \% badAnts}\label{fig:last-conv-pic}
-    \includegraphics[width=6cm]{images/50-bad-90.png}
-  \end{minipage}
-\end{figure}
-
-\begin{figure}
-  \begin{minipage}[b]{0.5\linewidth} % A minipage that covers half the page
-    \centering
-    \caption{30 sekunder, 12 \% badAnts}
-    \includegraphics[width=6cm]{images/60-bad-60.png}
-  \end{minipage}
-  \hspace{0.5cm} % To get a little bit of space between the figures
-  \begin{minipage}[b]{0.5\linewidth}
-    \centering
-    \caption{60 sekunder, 12 \% badAnts}
-    \includegraphics[width=6cm]{images/60-bad-60.png}
-  \end{minipage}
-
-  \begin{minipage}[b]{0.5\linewidth} % A minipage that covers half the page
-    \centering
-    \caption{90 sekunder, 12 \% badAnts}
-    \includegraphics[width=6cm]{images/60-bad-90.png}
-  \end{minipage}
-  \hspace{0.5cm} % To get a little bit of space between the figures
-  \begin{minipage}[b]{0.5\linewidth}
-    \centering
-    \caption{120 sekunder, 12 \% badAnts}
-    \includegraphics[width=6cm]{images/60-bad-120.png}
-  \end{minipage}
-  
-  \begin{minipage}[b]{0.5\linewidth} % A minipage that covers half the page
-    \centering
-    \caption{150 sekunder, 12 \% badAnts}
-    \includegraphics[width=6cm]{images/60-bad-150.png}
-  \end{minipage}
-  \hspace{0.5cm} % To get a little bit of space between the figures
-  \begin{minipage}[b]{0.5\linewidth}
-    \centering
-    \caption{180 sekunder, 12 \% badAnts}\label{fig:12proc}
-    \includegraphics[width=6cm]{images/60-bad-180.png}
-  \end{minipage}
-\end{figure}
-
-
-% Nya tester
-\begin{figure}
-  \begin{minipage}[b]{0.5\linewidth}
-    \centering
-    \caption{150 sekunder, 20 \% badAnts}\label{fig:first-new}
-    \includegraphics[width=6cm]{images/20procent-badass-150.png}
-  \end{minipage}
-  \begin{minipage}[b]{0.5\linewidth} % A minipage that covers half the page
-    \centering
-    \caption{330 sekunder, 30 \% badAnts}
-    \includegraphics[width=6cm]{images/30procent-badass-330.png}
-  \end{minipage}
-  \hspace{0.5cm} % To get a little bit of space between the figures
-  
-  \begin{minipage}[b]{0.5\linewidth} % A minipage that covers half the page
-    \centering
-    \caption{1320 sekunder, 40 \% badAnts}\label{fig:last-new}
-    \includegraphics[width=6cm]{images/40procent-badass-1320.png}
-  \end{minipage}
-  \hspace{0.5cm} % To get a little bit of space between the figures
-  
-  
-  
-\end{figure}
-
-\section{Applikationsområden}
-% Diskutera de frågor som nämns ovan och försöka att sätta in
-% laborationen i ett större sammanhang. Kan du se några
-% applikationsområden för den här typen av algoritmer? Kan modellen
-% utökas för att göras mer intressant?
-
-Tänkta applikationer för denna typen av algoritmer kan vara till
-exempel olika mediciner och behandlingar på nano-nivå där mycket enkla
-små agenter gemensamt kan konvergera till en komplex behandlingsform.
-
-Kluster av billiga datorer kan jobba gemensamt för att bilda ett
-komplext beteende. Distribuerad bearbetning och lagring av data på
-datorer runt om världen. Exempel på sådana projekt är exempel
-lösningar som räknar fram stora primtal eller behandlar signaler och
-letar efter tecken på utomjordiskt liv.
+\subsection{Hinder}
+% Vad krävs för att en flock ska kunna splittras 
+%     upp när de undviker ett hinder och gå ihop
+%     till en samlad flock när hindret är passerat?
+% Vilken metod valde ni och varför?
+% Hur skulle er metod fungera med andra hinder än punktformade?
+% Finns det någon gräns för hur stora hindren kan vara?
+\subsection{Mål}
+% Modellen ska utvidgas till att inkludera ett gemensamt mål,
+%           alltså en punkt eller yta i världen som alla boids
+%           strävar efter att nå.
+% Minimikravet är att man ska kunna ställa in målet genom att
+%             med muspekaren välja en punkt i världen
+% Hur bibehålls flockbeteendet när ett mål finns?
+% Hur stor vikt bör man lägga på mål, hinder och flockbeteende
+%             för att få ett beteende som ser naturligt ut?
+% Vilken sorts beteende anser ni är naturligt eller önskvärt? 
 
 \newpage
 \appendix
@@ -412,6 +233,6 @@ denna laboration
 
 \subsection{Termites.nlogo}\label{Termites.nlogo}
 \begin{footnotesize}
-  \verbatiminput{../src/Termites.nlogo}
+  \verbatiminput{../src/Flocking.nlogo}
 \end{footnotesize}
 \end{document}

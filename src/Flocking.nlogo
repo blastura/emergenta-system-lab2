@@ -1,3 +1,10 @@
+globals [
+  turns
+  align-turns
+  cohere-turns
+  separate-turns
+]
+
 breed [ obstacles obstacle ] ;; Breed to avoid
 breed [ boids boid ] ;; Boids
 
@@ -24,6 +31,8 @@ to setup
      set size 2 + random 5
      setxy random-xcor random-ycor
    ]
+   set-current-plot "turns"
+   set-plot-y-range 0 10
 end
 
 to go
@@ -49,7 +58,17 @@ if moving-obstacles? [
   ;; for greater efficiency, at the expense of smooth
   ;; animation, substitute the following line instead:
   ;;   ask turtles [ fd 1 ]
+  set-current-plot-pen "default"
+  plot turns 
+  reset-globals
   tick
+end
+
+to reset-globals
+  set turns 0
+  set align-turns 0
+  set cohere-turns 0
+  set separate-turns 0
 end
 
 ;;; OBSTACLE AVOIDANCE
@@ -58,8 +77,7 @@ to obstacle-avoidance
   find-obstacles
   if any? obstacles-in-vision
     [ find-nearest-obstacle
-      if distance nearest-obstacle < (minimum-range-to-obstacle + [size] of nearest-obstacle)
-        [ avoid-obstacle ]
+      avoid-obstacle 
     ]
 end
 
@@ -76,12 +94,12 @@ end
 
 to avoid-obstacle
   let angle towards nearest-obstacle
-  let dangle subtract-headings angle heading
+  ;;let dangle subtract-headings angle heading
   ;;show word "avoid-obstacle: vinkeln var " angle
-  show word "heading: " heading
-  show word "towards nearest-obstacle: " angle
-  show word "dangle: " dangle
-  show "  "
+  ;  show word "heading: " heading
+  ;  show word "towards nearest-obstacle: " angle
+  ;  show word "dangle: " dangle
+  ;  show "  "
   turn-away-from-obstacle angle max-avoidance-turn
 end
 
@@ -162,14 +180,15 @@ end
 
 to turn-away-from-obstacle [heading-to-obstacle max-turn]
   let angle (subtract-headings heading heading-to-obstacle)
-  ifelse angle > 0 [
-    set angle max-turn - angle
-    if angle < 0 [ set angle 0 ] 
+  let distance-to-obstacle distance nearest-obstacle - [size / 2] of nearest-obstacle
+  ;; Right turn, or straight on
+  ifelse angle >= 0 [
+    set angle (max-turn / distance-to-obstacle)
   ][
-    set angle max-turn + angle
-    if angle > 0 [ set angle 0 ] 
+  ;; Left turn
+    set angle (-(max-turn  / distance-to-obstacle))
   ]
-  show word "avoiding with angle: " angle
+  ;;show word "avoiding with angle: " angle
   turn-at-most angle max-turn
 end
 
@@ -178,9 +197,12 @@ end
 to turn-at-most [turn max-turn]  ;; turtle procedure
   ifelse abs turn > max-turn
     [ ifelse turn > 0
-        [ rt max-turn ]
-        [ lt max-turn ] ]
-    [ rt turn ]
+        [ set turns turns + max-turn
+          rt max-turn ]
+        [ set turns turns + max-turn
+          lt max-turn ] ]
+    [ set turns turns + abs turn
+      rt turn ]
 end
 
 
@@ -226,11 +248,11 @@ end
 GRAPHICS-WINDOW
 250
 10
-967
-748
+1064
+445
+100
 50
-50
-7.0
+4.0
 1
 10
 1
@@ -240,8 +262,8 @@ GRAPHICS-WINDOW
 1
 1
 1
--50
-50
+-100
+100
 -50
 50
 1
@@ -251,9 +273,9 @@ ticks
 
 CC-WINDOW
 5
-762
-976
-857
+571
+1295
+666
 Command Center
 0
 
@@ -298,37 +320,22 @@ population
 population
 1.0
 1000.0
-1
+140
 1.0
 1
 NIL
 HORIZONTAL
 
 SLIDER
-9
-277
-242
-310
+10
+249
+243
+282
 max-align-turn
 max-align-turn
 0.0
 20.0
-20
-0.25
-1
-degrees
-HORIZONTAL
-
-SLIDER
-9
-311
-242
-344
-max-cohere-turn
-max-cohere-turn
-0.0
-20.0
-3.5
+2.75
 0.25
 1
 degrees
@@ -336,14 +343,29 @@ HORIZONTAL
 
 SLIDER
 10
-346
+283
 243
-379
+316
+max-cohere-turn
+max-cohere-turn
+0.0
+20.0
+1.75
+0.25
+1
+degrees
+HORIZONTAL
+
+SLIDER
+11
+318
+244
+351
 max-separate-turn
 max-separate-turn
 0.0
 20.0
-4.25
+1
 0.25
 1
 degrees
@@ -357,23 +379,23 @@ SLIDER
 vision-radius
 vision-radius
 0.0
-10.0
-6.5
+20.0
+20
 0.5
 1
 patches
 HORIZONTAL
 
 SLIDER
-12
-242
-235
-275
+13
+214
+236
+247
 minimum-separation
 minimum-separation
 0.0
 5.0
-0.75
+1
 0.25
 1
 patches
@@ -395,33 +417,18 @@ NIL
 HORIZONTAL
 
 SLIDER
-7
-468
-240
-501
+10
+356
+243
+389
 max-avoidance-turn
 max-avoidance-turn
 0
 180
-44.5
+90
 0.5
 1
 degrees
-HORIZONTAL
-
-SLIDER
-7
-504
-239
-537
-minimum-range-to-obstacle
-minimum-range-to-obstacle
-1
-20
-4
-1
-1
-NIL
 HORIZONTAL
 
 SLIDER
@@ -433,17 +440,17 @@ vision-angle
 vision-angle
 2
 360
-298
+50
 1
 1
 NIL
 HORIZONTAL
 
 SWITCH
-14
-579
-162
-612
+17
+467
+165
+500
 follow-mouse?
 follow-mouse?
 0
@@ -451,10 +458,10 @@ follow-mouse?
 -1000
 
 SWITCH
-11
-543
-185
-576
+14
+431
+188
+464
 moving-obstacles?
 moving-obstacles?
 1
@@ -462,19 +469,36 @@ moving-obstacles?
 -1000
 
 SLIDER
-24
-636
-224
-669
+27
+524
+227
+557
 max-goal-turn
 max-goal-turn
 0
 20
-4
+2.5
 0.5
 1
 degrees
 HORIZONTAL
+
+PLOT
+1086
+28
+1286
+178
+turns
+ticks
+turns
+0.0
+10.0
+0.0
+10.0
+true
+false
+PENS
+"default" 1.0 0 -16777216 true
 
 @#$#@#$#@
 WHAT IS IT?

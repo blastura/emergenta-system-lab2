@@ -149,7 +149,6 @@ behandla.
   nå.
 \item Minimikravet är att man ska kunna ställa in målet genom att med
   muspekaren välja en punkt i världen
-\item Frågor att fundera kring:
 \item Hur bibehålls flockbeteendet när ett mål finns?
 \item Hur stor vikt bör man lägga på mål, hinder och flockbeteende för
   att få ett beteende som ser naturligt ut?
@@ -159,37 +158,100 @@ behandla.
 Laborationsspecifikation finns i original på sidan:\\
 \verb!http://www.cs.umu.se/kurser/5DV017/VT09/lab/lab2.html!
 
+
+\section{Användarhandledning}
+Källkoden till implementationen Flocking.nlogo som diskuteras i denna
+rapport finns att hitta på:
+
+\verb!~dit06ajn/edu/emergenta-system/lab2/src!
+
+Öppna filen i NetLogo för att köra den.
+
+\subsection{Förklaring av användargränssnittet}
+Nedan följer en förklaring av de knappar och reglage som förekommer i
+användargränssnittet:
+
+\begin{itemize}
+\item \textbf{population} - antalet individer i världen.
+\item \textbf{nr-of-obstacles} - antalet hinder i världen.
+\item \textbf{setup} - denna knapp initierar parametrarna till världen.
+\item \textbf{go} - denna knapp sätter igång animeringen i
+  världen. Setup måste köras en gång innan denna knapp får användas.
+\item \textbf{vision-radius} - antalet rutor en individ kan se.
+\item \textbf{vision-angle} - vinkeln för en individs synfält angett i
+  grader.
+\item \textbf{minimum-seperation} - det minsta avståndet en individ
+  vill ha till sina grannar angett i rutor.
+\item \textbf{max-align-turn} - den maximala vinkeln en individ kan
+  svänga för att komma i samma färdriktning som sina grannar.
+\item \textbf{max-cohere-turn} - den maximala vinkeln en individ kan
+  svänga för att komma närmare mittpunkten av sina grannar.
+\item \textbf{max-seperate-turn} - den maximala vinkeln en individ kan
+  svänga för att komma längre bort från sin närmsta granne.
+\item \textbf{max-avoidance-turn} - den maximala vinkeln en individ
+  kan svänga för att undvika ett hinder.
+\item \textbf{moving-obstacles?} - om denna är på förflyttar sig
+  hindren i slumpmässig riktning.
+\item \textbf{follow-mouse?} - om denna är på försöker individerna att
+  följa efter muspekaren om den befinner sig inom världens gränser.
+\item \textbf{max-goal-turn} - den maximala vinkel en individ får
+  använda sig av för att svänga mot muspekaren.
+\end{itemize}
+
+Avstånd är mätt i antal rutor i världen, vinklar är mätt i grader.
+
 \section{Algoritmbeskrivning}
 Nedan avsnitt beskriver de algoritmer som implementerats för att
 införa hinderavvikelse och målsökande i modellen.
 
-\subsection{Hinder}
+\subsection{Hinder}\label{algo:hinder}
 För att flockarna ska kunna undvika hinder har det införts nya agenter
 härefter refererade som \textit{hinder}. Varje individ fått en ny
-procedur \textit{obstacle-avoidance} som utförs efter att de har
-utfört sitt flock-beteende.
+procedur \textit{obstacle-avoidance} som utförs före att de har utfört
+sitt flock-beteende.
 
 Metoden \textit{steer-to-avoid} implementerades där hinderundvikande
 löses genom att varje individ letar efter det närmaste hinder som
-befinner sig i en kon framför deras färdriktning. Konens storlek
-bestäms av variablerna \textit{vision-radius} och
-\textit{vision-angle}. Om ett hinder upptäckts som är närmare
-individen än vad variabeln \textit{minimum-range-to-obstacle} anger så
-svänger individen bort från detta hinder. Maximalt tillåten vinkel
-denna sväng får anta i varje tidssteg är begränsad av variabeln
-\textit{max-avoidance-turn}. %TODO
+befinner sig i en kon i deras färdriktning, se figur
+\ref{fig:collision}. Konens storlek bestäms av variablerna
+\textit{vision-radius} och \textit{vision-angle}. Om ett hinder
+upptäckts i konen svänger individen bort från denna med en vinkel som
+beräknas enligt \textit{max-avoidance-turn} delat med avståndet till
+hindret. Detta innebär att enheten vid tidig upptäckt av hinder
+svänger minimalt, när enheten närmar sig hindret ökar vinkeln den
+försöker svänga bort med. Den initiala vinkeln, se \textit{v} i figur
+\ref{fig:collision}, individen har mot målet i förhållande till sin
+färdriktning används för att bestämma vilket håll om hindret individen
+ska välja för att förhindra kollision. Om \textit{v} är negativ
+svänger individen åt vänster, annars åt höger.
+
+\begin{figure}[H]
+  \begin{center}
+    \includegraphics[width=110mm]{images/collision.pdf}
+    \caption{Kollisionshantering}
+    \label{fig:collision}
+  \end{center}
+\end{figure}
 
 \subsection{Mål}
 För att få flockarna att söka sig mot ett gemensamt mål
 implementerades proceduren \textit{find-goal} som räknar ut vinkeln
-mot målet, representerat av muspekarens position. Individerna svänger
-mot målet i varje tidssteg med maximalt tillåten vinkel som är samma
-som individerna får använda sig av för att röra sig mot mitten av
-flocken, \textit{max-cohere-turn}.
+mot målet, representerat av mus\-pekarens position. Individerna svänger
+mot målet i varje tidssteg med maximalt tillåten vinkel,
+\textit{max-goal-turn}.
 
 \section{Strategi för testning}
+Under laborationens gång används trial-and-error för att testa ifall
+koden genererar önskade beteenden. För att få svar på frågorna görs
+försök till att upprepa samma situation flera gånger med olika
+parameterinställningar för att subjektivt bedömma hur parametrarna
+påverkar beteenden. För återskapa beteenden som diskuteras i rapporten
+ombeds testkörningar med programmet där parametrar ändras på det sätt
+som beskrivs i avsnitt \ref{sec:reflektioner}.
 
-\section{Reflektioner}
+Några skärmdumpar presenteras som diskussionsunderlag till beteenden.
+
+\section{Reflektioner}\label{sec:reflektioner}
 % Rapportens huvudsyfte är att redovisa era reflektioner kring det som
 % laborationen behandlar, dvs reflektionsdelen är viktig.  Diskutera
 % de frågor som nämns ovan och försöka att sätta in laborationen i ett
@@ -215,12 +277,57 @@ frågorna från problemspecifikationen.
 För att en flock ska splittras vid ett hinder och sedan samlas ihop
 igen på andra sidan hindret krävs att individerna har tillräckligt
 stor sikt för att kunna upptäcka individer som tvingades välja en
-annan väg runt hindret. Det kan hända att detta fall inte inträffar om
-splittringen av flocken blir för stor.
+annan väg runt hindret. Anledningen till att individerna återförenas i
+en flock efter de har stött på ett hinder är deras
+\textit{coherence}-beteende gör att de strävar mot en gemensam
+mittpunkt för flocken. Se figur \ref{fig:flock} för en sekvens där en
+flock möter ett hinder, inställningar för simulering finns i bilaga
+\ref{app:flock}.
+
+\begin{figure}[H]
+  \begin{center}
+    \includegraphics[width=110mm]{images/flock.png}
+    \caption{Kollisionshantering för flock}
+    \label{fig:flock}
+  \end{center}
+\end{figure}
+
+Många parametrar spelar in vid återförening av flocken efter
+hinder. Om vinkeln mellan de två flockarna är stor samtidigt som
+individernas \textit{cohere-turn}-parameter är låg kan flockarna
+återförening utebli även fast de initialt såg varandra när hindret
+forcerats. Detta eftersom de inte hinner svänga mot varandra innan
+deras synfällt upphör att sammanfalla.
+
 % Vilken metod valde ni och varför?
+Vi valde att implementera ett \textit{steer-to-avoid}-beteende, se
+avsnitt \ref{algo:hinder}, till skillnad från
+\textit{force-field}-beteende som skulle innebära att ett hinder
+stöter bort enheten oberoende av enhetens riktning. Beteendet
+\textit{steer-to-avoid} innebär att en individ kan röra sig parallellt
+med ett hinder utan att påverkas av det. Detta är viktigt för
+återförenande av flockar efter hinder. Notera dock att sätts vinkeln
+\textit{vision-angle} till ett stort värde nära 360 grader kommer
+denna metod att likna \textit{force-field}-metoden i och med att
+individen påverkas av hinder som inte enbart ligger framför dess
+färdriktning.
+
+I nuläget är hindret implementerat som en cirkel med en diameter
+motsvarande storleken. När vinkel mellan en individ och ett hinder
+beräknas betraktas hindrets mittpunkt och hänsyn kommer inte tas till
+hindrets storlek. Däremot beräknas avståndet till hindret som
+mittpunkt på hindret - radien för att få ett hinder med en
+cirkulär yta.
 
 % Hur skulle er metod fungera med andra hinder än punktformade?
 % Finns det någon gräns för hur stora hindren kan vara?
+Eftersom vår modell använder sig av den inbyggda metoden
+\textit{in-cone} för att upptäcka hinder i en individs synfält används
+hindrens mittpunkt vid detektion. Detta innebär en begränsning som gör
+att storleken på hindrena inte får överstiga en enhets parametervärde
+på \textit{vision-radius}. Om så är fallet kommer individen att krocka
+redan innan den har upptäckt hindret den krockar med.
+
 \subsection{Mål}
 % Modellen ska utvidgas till att inkludera ett gemensamt mål,
 %           alltså en punkt eller yta i världen som alla boids
@@ -229,15 +336,26 @@ splittringen av flocken blir för stor.
 %             med muspekaren välja en punkt i världen
 % Hur bibehålls flockbeteendet när ett mål finns?
 När modellen utökades för att få individerna att söka sig mot ett
-gemensamt mål blir det svårare att avskilja vad som är flockbeteende
+gemensamt mål blev det svårare att avskilja vad som är flockbeteende
 och vad som är målsökarbeteende. Eftersom alla strävar mot samma mål
-får närliggande individer samma riktning. Om man ändrar på parametern
-för en individs maxsväng \textit{max-goal-turn} ser man att
-flockbeteendet finns kvar även när alla individer smått justerar sin
-riktning mot målet. 
+får närliggande individer samma riktning. Om man minskar på parametern
+som anger en individs maxsväng mot mål, \textit{max-goal-turn},
+upplevs flockbeteendet starkare eftersom individernas svängar för
+flockbeteende får högre dominans än individernas målsökande svängar.
+
 % Hur stor vikt bör man lägga på mål, hinder och flockbeteende
-%             för att få ett beteende som ser naturligt ut?
-% Vilken sorts beteende anser ni är naturligt eller önskvärt? 
+% för att få ett beteende som ser naturligt ut?
+I våra testkörningar har vi noterat att balansen mellan mål- och
+flockbeteende är avgörande för hur naturlikt simuleringen verkar. Med
+naturlikt menar vi flockbeteende som kan ses bland fåglar och
+fiskar. Vi anser då att det bör läggas störst vikt vid att undvika
+hinder, det vill säga att i simuleringen tillåta individerna en stor
+vinkel på \textit{max-avoidance-turn}. Därefter bör det läggas större
+vikt på flockbeteende än på målsökarbeteende. Vi gör jämförelsen med
+flyttfåglar där målsökandet är något som kontinuerligt sker över en
+större tidsperiod än flockbeteendet, som är en mer aktiv process.
+
+% DONE Vilken sorts beteende anser ni är naturligt eller önskvärt? 
 
 \newpage
 \appendix
@@ -248,8 +366,25 @@ riktning mot målet.
 Härefter följer utskrifter från källkoden och andra filer som hör till
 denna laboration
 
+\subsection{Paremeterinställningar för figur \ref{fig:flock}}\label{app:flock}
+\begin{itemize}
+\item \textbf{population} - 140
+\item \textbf{nr-of-obstacles} - 1
+\item \textbf{vision-radius} - 20
+\item \textbf{vision-angle} - 50
+\item \textbf{minimum-seperation} - 1
+\item \textbf{max-align-turn} - 2.75
+\item \textbf{max-cohere-turn} - 2.75
+\item \textbf{max-seperate-turn} - 1
+\item \textbf{max-avoidance-turn} - 90
+\item \textbf{moving-obstacles?} - off
+\item \textbf{follow-mouse?} - off
+\item \textbf{max-goal-turn} - 2.5
+\end{itemize}
+
 \subsection{Flocking.nlogo}\label{app:Flocking.nlogo}
 \begin{footnotesize}
   \verbatiminput{../src/Flocking.nlogo}
 \end{footnotesize}
+
 \end{document}

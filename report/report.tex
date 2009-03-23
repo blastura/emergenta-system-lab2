@@ -40,7 +40,7 @@
 
 % vars
 \def\title{Boids}
-\def\preTitle{Laboration 2}
+\def\preTitle{Laboration 2 (andra inlämning)}
 \def\kurs{Emergenta system, VT-09}
 
 \def\namn{Andreas Jakobsson}
@@ -215,15 +215,16 @@ löses genom att varje individ letar efter det närmaste hinder som
 befinner sig i en kon i deras färdriktning, se figur
 \ref{fig:collision}. Konens storlek bestäms av variablerna
 \textit{vision-radius} och \textit{vision-angle}. Om ett hinder
-upptäckts i konen svänger individen bort från denna med en vinkel som
-beräknas enligt \textit{max-avoidance-turn} delat med avståndet till
-hindret. Detta innebär att enheten vid tidig upptäckt av hinder
-svänger minimalt, när enheten närmar sig hindret ökar vinkeln den
-försöker svänga bort med. Den initiala vinkeln, se \textit{v} i figur
-\ref{fig:collision}, individen har mot målet i förhållande till sin
-färdriktning används för att bestämma vilket håll om hindret individen
-ska välja för att förhindra kollision. Om \textit{v} är negativ
-svänger individen åt vänster, annars åt höger.
+upptäckts i konen svänger individen bort från detta hinder med en
+vinkel som beräknas enligt \textit{max-avoidance-turn} delat med
+avståndet mellan individen och hindret. Detta innebär att enheten vid
+tidig upptäckt av hinder svänger minimalt, när enheten närmar sig
+hindret ökar vinkeln den försöker svänga bort med. Den initiala
+vinkeln, se \textit{v} i figur \ref{fig:collision}, individen har mot
+målet i förhållande till sin färdriktning används för att bestämma
+vilket håll om hindret individen ska välja för att förhindra
+kollision. Om \textit{v} är negativ svänger individen åt vänster,
+annars åt höger.
 
 \begin{figure}[H]
   \begin{center}
@@ -251,6 +252,37 @@ som beskrivs i avsnitt \ref{sec:reflektioner}.
 
 Några skärmdumpar presenteras som diskussionsunderlag till beteenden.
 
+\subsection{Intressanta beteenden}
+Vid körningar har noteras ett antal intressanta beteenden för
+specifika inställningar på de olika parametrarna. Nedan listas olika
+inställningsförlag och resulterande beteenden.
+
+\begin{itemize}
+\item \textbf{Vision-angle} - Vid \textit{vision-angle} satt till 360
+  grader kommer det hinderavvikande beteendet helt att likna metoden
+  \textit{force-field}. Det vill säga individerna stöts bort från
+  hinder ungefär som om det skulle finnas ett kraftfält kring det.
+  
+\item \textbf{Max-cohere-turn} - Vid högt värde, exempelvis 20 grader,
+  kommer flockbeteendet att mer likna ett svärmbeteende.
+  
+\item \textbf{Max-align-turn} - Vid högt värde på
+  \textit{max-align-turn} kommer individerna att svänga tillsammans i
+  flockar på ett väldigt \textit{hårt} och \textit{onaturligt} sätt.
+
+\item \textbf{Minimum-seperation} - Vid lågt värde på
+  \textit{minimum-seperation}, exempelvis 0,25 rutor, kommer flockarna
+  att samlas ihop till streck, där många individer kommer att
+  överlappa varandra.
+\end{itemize}
+
+Intressant att testa är när ett värde är satt till 0, detta kommer att
+innebära att vald funktion slås av. Exempelvis 0 graders
+\textit{max-cohere-turn} innebär att individerna inte längre kommer
+att sträva mot flockens mittpunkt. För övrigt noteras att det räcker
+med de absolut minsta värdena skiljt från noll räcker för att ett
+flockbeteende ska uppstå med tiden.
+
 \section{Reflektioner}\label{sec:reflektioner}
 % Rapportens huvudsyfte är att redovisa era reflektioner kring det som
 % laborationen behandlar, dvs reflektionsdelen är viktig.  Diskutera
@@ -271,9 +303,10 @@ Nedan avsnitt beskriver reflektioner som gjorts med avseende på
 frågorna från problemspecifikationen.
 
 \subsection{Hinder}
-% Vad krävs för att en flock ska kunna splittras 
-%     upp när de undviker ett hinder och gå ihop
-%     till en samlad flock när hindret är passerat?
+\textbf{Vad krävs för att en flock ska kunna splittras upp när de
+  undviker ett hinder och gå ihop till en samlad flock när hindret är
+  passerat?}
+
 För att en flock ska splittras vid ett hinder och sedan samlas ihop
 igen på andra sidan hindret krävs att individerna har tillräckligt
 stor sikt för att kunna upptäcka individer som tvingades välja en
@@ -299,7 +332,10 @@ individernas \textit{cohere-turn}-parameter är låg kan flockarna
 forcerats. Detta eftersom de inte hinner svänga mot varandra innan
 deras synfällt upphör att sammanfalla.
 
-% Vilken metod valde ni och varför?
+\textbf{Vilken metod (\textit{steer-to-avoid / force-flield}) valde ni
+  och varför?}
+
+
 Vi valde att implementera ett \textit{steer-to-avoid}-beteende, se
 avsnitt \ref{algo:hinder}, till skillnad från
 \textit{force-field}-beteende som skulle innebära att ett hinder
@@ -319,43 +355,51 @@ hindrets storlek. Däremot beräknas avståndet till hindret som
 mittpunkt på hindret - radien för att få ett hinder med en
 cirkulär yta.
 
-% Hur skulle er metod fungera med andra hinder än punktformade?
-% Finns det någon gräns för hur stora hindren kan vara?
-Eftersom vår modell använder sig av den inbyggda metoden
-\textit{in-cone} för att upptäcka hinder i en individs synfält används
-hindrens mittpunkt vid detektion. Detta innebär en begränsning som gör
-att storleken på hindrena inte får överstiga en enhets parametervärde
-på \textit{vision-radius}. Om så är fallet kommer individen att krocka
-redan innan den har upptäckt hindret den krockar med.
+\textbf{Hur skulle er metod fungera med andra hinder än punktformade?
+  Finns det någon gräns för hur stora hindren kan vara?}
+
+Vår modell använder sig av den inbyggda metoden \textit{in-cone} för
+att upptäcka hinder i en individs synfält. Eftersom hindren består av
+agenter betraktas bara agentens mittpunkt vid detektion. Detta innebär
+en begränsning som gör att storleken på hindrena inte får överstiga
+parametervärdet \textit{vision-radius}. Om så är fallet kommer
+individen att krocka redan innan den har upptäckt hindret den krockar
+med.
 
 \subsection{Mål}
-% Modellen ska utvidgas till att inkludera ett gemensamt mål,
-%           alltså en punkt eller yta i världen som alla boids
-%           strävar efter att nå.
-%           Minimikravet är att man ska kunna ställa in målet genom att
-%             med muspekaren välja en punkt i världen
-% Hur bibehålls flockbeteendet när ett mål finns?
-När modellen utökades för att få individerna att söka sig mot ett
-gemensamt mål blev det svårare att avskilja vad som är flockbeteende
-och vad som är målsökarbeteende. Eftersom alla strävar mot samma mål
-får närliggande individer samma riktning. Om man minskar på parametern
-som anger en individs maxsväng mot mål, \textit{max-goal-turn},
-upplevs flockbeteendet starkare eftersom individernas svängar för
-flockbeteende får högre dominans än individernas målsökande svängar.
+% Modellen ska utvidgas till att inkludera ett gemensamt mål, alltså en
+% punkt eller yta i världen som alla boids strävar efter att nå.
+% Minimikravet är att man ska kunna ställa in målet genom att med
+% muspekaren välja en punkt i världen
+            
+\textbf{Hur bibehålls flockbeteendet när ett mål finns?}
 
-% Hur stor vikt bör man lägga på mål, hinder och flockbeteende
-% för att få ett beteende som ser naturligt ut?
+
+När modellen utökades för att få individerna att söka sig mot ett
+gemensamt mål (muspekaren) blev det svårare att avskilja vad som är
+flockbeteende och vad som är målsökarbeteende. Eftersom alla strävar
+mot samma mål får närliggande individer samma riktning. Om man minskar
+på parametern som anger en individs maxsväng mot mål,
+\textit{max-goal-turn}, upplevs flockbeteendet starkare eftersom
+individernas svängar för flockbeteende får högre dominans än
+individernas målsökande svängar.
+
+\textbf{Hur stor vikt bör man lägga på mål, hinder och flockbeteende
+  för att få ett beteende som ser naturligt ut?}
+
 I våra testkörningar har vi noterat att balansen mellan mål- och
 flockbeteende är avgörande för hur naturlikt simuleringen verkar. Med
 naturlikt menar vi flockbeteende som kan ses bland fåglar och
-fiskar. Vi anser då att det bör läggas störst vikt vid att undvika
+fiskar.
+
+\textbf{Vilken sorts beteende anser ni är naturligt eller önskvärt?}
+
+Vi anser då att det bör läggas störst vikt vid att undvika
 hinder, det vill säga att i simuleringen tillåta individerna en stor
 vinkel på \textit{max-avoidance-turn}. Därefter bör det läggas större
 vikt på flockbeteende än på målsökarbeteende. Vi gör jämförelsen med
 flyttfåglar där målsökandet är något som kontinuerligt sker över en
 större tidsperiod än flockbeteendet, som är en mer aktiv process.
-
-% DONE Vilken sorts beteende anser ni är naturligt eller önskvärt? 
 
 \newpage
 \appendix
